@@ -5,6 +5,23 @@
 		<title>Primer Ejemplo Firebase</title>
 	</head>
 	<body>
-		
+		<h1 id="holaMundo"></h1>
+		<script src="https://www.gstatic.com/firebasejs/3.7.3/firebase.js"></script>
+		<script>
+			var config = {
+				apiKey: "AIzaSyDS5JDH0OeTTywz-GQ29FkGXqN-TZGRShc",
+				authDomain: "inatec-6d717.firebaseapp.com",
+				databaseURL: "https://inatec-6d717.firebaseio.com",
+				storageBucket: "inatec-6d717.appspot.com",
+				messagingSenderId: "51838091736"
+			};
+			firebase.initializeApp(config);
+			var holamundo = document.getElementById('holaMundo');
+			var dbRef = firebase.database().ref().child('text');
+			//dbRef.on('value', snap => holaMundo.innerText = snap.val());
+			dbRef.on('value', function(snap){
+				holaMundo.innerText = snap.val()
+			});
+		</script>
 	</body>
 </html>
