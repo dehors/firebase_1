@@ -83,4 +83,45 @@
 			btnLogOut.classList.add('hide');
 		}
 	});
+
+	//Upload
+	var uploader = document.getElementById('uploader');
+	var fileButton = document.getElementById('fileButton');
+
+	fileButton.addEventListener('change',function(e){
+		var file = e.target.files[0];
+		var storageRef = firebase.storage().ref('mis_fotos/'+file.name);
+		var task = storageRef.put(file);
+		task.on('state_changed',
+			function progress(snapshot){
+				var percentage = (snapshot.bytesTransferred / snapshot.totalBytes)*100;
+				uploader.value = percentage;
+			},
+			function error(err){
+
+			},
+			function complete(){
+
+			}
+		);
+	});
+
+	//Consultar
+	const cursos = dbRef1.child('cursos/js');
+	const suscritos = dbRef1.child('suscritoCurso/js');
+
+	const curso = dbRef1.child('cursos');
+	// const query = curso
+	// 			  .orderByChild('nombre')
+	// 			  .equalTo('sdasd')
+	// 			  .limitToFirst(1);
+
+	cursos.on('value',snap => {
+		console.log(JSON.stringify(snap.val(),null,3));
+	});
+
+	suscritos.on('child_added',snap => {
+		console.log(JSON.stringify(snap.val(),null,3));
+	});
+
 }());
