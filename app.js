@@ -7,12 +7,15 @@
 		messagingSenderId: "51838091736"
 	};
 	firebase.initializeApp(config);
+	var userConect = null;
+	var UserKey = "";
+	var database = firebase.database();
 
 	//Obtener elemento
 	const preObject = document.getElementById('objeto');
 	const ulList = document.getElementById('list');
 	//Crear referencia
-	var dbRef1 = firebase.database().ref().child('objeto');
+	var dbRef1 = database.ref().child('objeto');
 	var dbRef2 = dbRef1.child('habilidades');
 	//Sicronizar cambios objecto
 	dbRef1.on('value', snap => {
@@ -27,8 +30,7 @@
 	});
 
 	dbRef2.on('child_changed', snap => {
-		const liChanged = document.getElementById('snap.key');
-		liChanged.innerText = snap.val();
+		console.log(snap.val());
 	});
 
 	dbRef2.on('child_removed', snap => {
@@ -72,12 +74,23 @@
 
 	btnLogOut.addEventListener('click', e =>{
 		firebase.auth().signOut();
+		destroy();
 	});
 
 	firebase.auth().onAuthStateChanged( firebaseUser => {
 		if (firebaseUser) {
 			console.log(firebaseUser);
 			btnLogOut.classList.remove('hide');
+			userConect=database.ref("/users");
+			store(firebaseUser.uid,firebaseUser.email);
+			userConect.on('child_added',function(data){
+				console.log('Se a conectado '+data.val().email);
+			});
+
+			userConect.on('child_removed', snap => {
+				console.log(snap.val().email+" Ha cerrado");
+			});
+
 		}else{
 			console.log('no logeuado');
 			btnLogOut.classList.add('hide');
@@ -123,5 +136,38 @@
 	suscritos.on('child_added',snap => {
 		console.log(JSON.stringify(snap.val(),null,3));
 	});
+
+	//Agregar registro
+	function store(uid,email){
+		var conectados = userConect.push({
+			uid:uid,
+			email:email
+		});
+		UserKey = conectados.key;
+	}
+	function destroy(){
+		database.ref("/users/"+UserKey).remove();
+	}
+
+	var ref = firebase.database().ref("onlineState");
+	ref.onDisconnect().set(false);
+
+	ref.onDisconnect().cancel();
+
+	ref.onDisconnect().remove();
+
+	var ref = firebase.database().ref("users/ada/status");
+	ref.onDisconnect().set("I disconnected!");
+
+	var ref = firebase.database().ref("users/ada");
+	ref.update({
+		onlineState: true,
+		status: "I'm online."
+	});
+	ref.onDisconnect().update({
+		onlineState: false,
+		status: "I'm offline."
+	});
+
 
 }());
